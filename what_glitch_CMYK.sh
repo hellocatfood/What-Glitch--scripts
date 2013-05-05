@@ -1,63 +1,22 @@
 #!/bin/bash
 
-# What Glitch? bmp/cmyk.
-# By Antonio Roberts
-# www.hellocatfood.com
-# GNU/GPL. See License for license details
+echo -e $0
+echo -e "By Antonio Roberts | hellocatfood"
+echo -e "www.hellocatfood.com"
+echo -e "GNU/GPL. See Licence"
+file=$1
+echo -e "Lets glitch $file" 
 
-#What Glitch?
-#======================
-#The What Glitch? scripts were made to demonstrate the wide variety of glitches and compression artifacts you can find in image file formats. The method used in most of the scripts is to find and replace parts of text within the image file, although reducing the bit depth can also produce commonly seen glitch visuals
-
-#Required Dependencies
-#=====================
-#Sed
-#FFMPEG
-#Mplayer
-#Imagemagick
-
-#Basic Useage
-#==================
-#1. Make the file executable: In a terminal type chmod+x what_glitch_webp.sh
-#2. Run ./what_glitch_CMYK.sh
-#3. Drop a video file into terminal window and press Enter
-
-#Notes
-#==================
-#The scripts have only been tested on Ubuntu Linux 10.10. If you are able to get them working with other operating systems please feel free to share your techniques
-
-#These scripts seem to work best with AVI video files that are 24 or 25 frames per second. Files that are 30 frames per second get out of sync with the audio
-
-#Make sure the name of the directory containing the image to glitch doesn't contain spaces e.g. "untitled_folder" instead of "untitled folder"
-
-#The video needs audio order for this script to work. If you know what you're doing you can edit parts of this script for it to work on files that have no audio
-
-#As this scripts processes each frame of a video file it will take a very long time to complete. It is recommended for use only on small video clips!
-
-echo -e "\033[33mWhat Glitch? bmp/cmyk. \033[0m"
-echo -e "\033[32mBy Antonio Roberts | hellocatfood \033[0m"
-echo -e "\033[35mwww.hellocatfood.com \033[0m"
-echo -e "\033[31mGNU/GPL. See License for license details \033[0m"
-read -p "DROP A VIDEO FILE HERE> " file
-echo -e "\033[32mLets glitch $file \033[0m" 
-file="$(echo $file | sed -e "s/'//" | sed -e "s/'//")"
-
-#calculate the framerate
-framerate=$(mplayer -vo null -ao null -cache-min 0 -frames 0 -identify $file | grep ID_VIDEO_FPS= | sed -e "s/"ID_VIDEO_FPS="//")
+#get bitrate
+bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
 
 #make a directory to do the glitching
 rand=$RANDOM
-mkdir temp_$rand
-cd temp_$rand
-
-#extract the audio
-ffmpeg -i $file -ab 320k videoaudio.wav
+mkdir /tmp/temp_$rand
+cd /tmp/temp_$rand
 
 #convert the movie to frames
-ffmpeg -i $file -sameq -r $framerate out_%d.bmp
-
-#get the size of the image
-imsize=$(identify -format "%wx%h" out_1.bmp)
+avconv -i $file -b "$bitRate"k out_%d.bmp
 
 #count the number files in the directory
 fileno=$(ls out_*.bmp -1 | wc -l)
@@ -73,10 +32,10 @@ convert -colorspace CMYK -separate out_$no.bmp in_%d.bmp
 sed -i s/t/63a/g in_0.bmp
 
 #glitch the magenta channel
-sed -i s/l/££uns/g in_1.bmp
+sed -i s/l/ÃÂ£ÃÂ£uns/g in_1.bmp
 
 #glitch the yellow channel
-sed -i s/h/£24/g in_2.bmp
+sed -i s/h/ÃÂ£24/g in_2.bmp
 
 #glitch the key channel
 sed -i s/a/64a/g in_3.bmp
@@ -87,17 +46,17 @@ convert in_0.bmp in_1.bmp in_2.bmp in_3.bmp -set colorspace CMYK -combine out_$n
 #clear the directory of files
 rm in_*.bmp
 
-echo -e "\033[33mGlitched file $no of $fileno \033[0m"
+echo -e "Glitched file $no of $fileno"
 
 no=`expr $no + 1`
 
 done
 
 #combine the images into a video
-ffmpeg -i videoaudio.wav -i out_%d.bmp -sameq -vcodec huffyuv -r $framerate ../outfile_bmpcmyk_"$rand".mkv
+avconv -i out_%d.bmp -b "$bitRate"k "$file"_bmpcmyk.mkv
 
 #remove the temporary directory
 cd ../
 rm -rf temp_$rand/
-echo -e "\033[33mJob done. Check for outfile_bmpcmyk_"$rand".mkv \033[0m"
-echo -e "\033[31m---------------------------------------------------- \033[0m"
+echo -e "Job done. Check for "$file"_bmpcmyk.mkv"
+echo -e "----------------------------------------------------"
