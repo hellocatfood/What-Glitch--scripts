@@ -1,4 +1,4 @@
-What Glitch?
+What Glitch? scripts
 By Antonio Roberts
 www.hellocatfood.com
 GNU/GPL.
@@ -18,11 +18,11 @@ Basic Usage
 ==================
 1. Make the file executable: In a terminal type chmod+x what_glitch_1bitgif.sh
 2. Run ./what_glitch_1bitgif.sh /path/to/video/file
-3. Hit enter
+3. Hit Enter
 4. Wait
 
 Notes
 ==================
 The scripts have only been tested on Ubuntu 10.10 and 12.04. If you are able to get them working with other operating systems please feel free to share your techniques
 
-As this scripts processes each frame of a video file it will take a very long time to complete. It is recommended for use only on small video clips!
+As this scripts processes each frame of a video file it will take a very long time to complete. It is recommended for use only on short video clips!

@@ -1,19 +1,14 @@
 #!/bin/bash
 
-echo -e $0
-echo -e "By Antonio Roberts | hellocatfood"
-echo -e "www.hellocatfood.com"
-echo -e "GNU/GPL. See Licence"
 file=$1
-echo -e "Lets glitch $file" 
-
-#get bitrate
-bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
 
 #make a directory to do the glitching
 rand=$RANDOM
 mkdir /tmp/temp_$rand
 cd /tmp/temp_$rand
+
+#get bitrate
+bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
 
 #convert the movie to frames
 avconv -i $file -b "$bitRate"k out_%d.bmp
@@ -42,4 +37,3 @@ avconv -i out_%d.gif -b "$bitRate"k "$file"_1bitgif.mkv
 #remove the temporary directory
 cd ../
 rm -rf temp_$rand/
-echo -e "Job done. Check for "$file"_1bitgif.mkv"
