@@ -9,11 +9,8 @@ rand=$RANDOM
 mkdir /tmp/temp_$rand
 cd /tmp/temp_$rand
 
-#get bitrate
-bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
-
 #convert the movie to frames
-avconv -i $file -b "$bitRate"k out_%d.bmp
+avconv -i $file -qscale 0 out_%d.bmp
 
 #count the number files in the directory
 fileno=$(ls out_*.bmp -1 | wc -l)
@@ -36,7 +33,7 @@ no=`expr $no + 1`
 done
 
 #combine the images into a video
-avconv -i out_%d.bmp -b "$bitRate"k "$file"_bmp.mkv
+avconv -i out_%d.bmp -qscale 0 "$file"_bmp.mkv
 
 #remove the temporary directory
 cd ../

@@ -7,11 +7,8 @@ rand=$RANDOM
 mkdir /tmp/temp_$rand
 cd /tmp/temp_$rand
 
-#get bitrate
-bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
-
 #convert the movie to frames
-avconv -i $file -b "$bitRate"k out_%d.tga
+avconv -i $file -qscale 0 out_%d.tga
 
 #count the number files in the directory
 fileno=$(ls out_*.tga -1 | wc -l)
@@ -29,7 +26,7 @@ sed -i s/$rand1/$rand2/ out_$no.tga
 
 echo -e "Glitched file $no of $fileno"
 
-no=`expr $no + 1`
+no=$(($no + 1))
 
 done
 
@@ -51,8 +48,15 @@ EOF
 
 rm out_*.tga
 
+#get path of file
+path=$( readlink -f "$( dirname "$file" )" )
+
+#get filename minus extension
+file1=$(basename "$file")
+filename="${file1%.*}"
+
 #combine the images into a video
-avconv -i out_%d.bmp -b "$bitRate"k "$file"_tga.mkv
+avconv -i out_%d.bmp -qscale 0 "$path"/"$filename"_tga.mkv
 
 #remove the temporary directory
 cd ../

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Copyright 2013 Antonio Roberts, License: GPL v3+
+
 file=$1
 
 #make a directory to do the glitching
@@ -8,7 +10,7 @@ mkdir /tmp/temp_$rand
 cd /tmp/temp_$rand
 
 #convert the movie to frames
-avconv -i $file -qscale 0 out_%d.bmp
+avconv -i $file -b "$bitRate"k out_%d.bmp
 
 #count the number files in the directory
 fileno=$(ls out_*.bmp -1 | wc -l)
@@ -50,19 +52,12 @@ rm in_*.bmp
 
 echo -e "Glitched file $no of $fileno"
 
-no=$(($no + 1))
+no=`expr $no + 1`
 
 done
 
-#get path of file
-path=$( readlink -f "$( dirname "$file" )" )
-
-#get filename minus extension
-file1=$(basename "$file")
-filename="${file1%.*}"
-
 #combine the images into a video
-avconv -i out_%d.bmp -qscale 0 "$path"/"$filename"_bmpcmyk.mkv
+avconv -i out_%d.bmp -b "$bitRate"k "$file"_bmpcmyk.mkv
 
 #remove the temporary directory
 cd ../

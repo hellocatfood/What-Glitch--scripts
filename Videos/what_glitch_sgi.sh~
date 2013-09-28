@@ -13,10 +13,10 @@ cd /tmp/temp_$rand
 bitRate=$(avprobe $1 2>&1 | grep bitrate | cut -d ':' -f 6 | sed s/"kb\/s"//)
 
 #convert the movie to frames
-avconv -i $file -qscale 0 out_%d.tga
+avconv -i $file -qscale 0 out_%d.sgi
 
 #count the number files in the directory
-fileno=$(ls out_*.tga -1 | wc -l)
+fileno=$(ls out_*.sgi -1 | wc -l)
 
 #begin the glitch loop
 no=1
@@ -24,21 +24,20 @@ while [ $no -le $fileno ]
 do
 
 rand1=$(tr -dc A-Za-z0-9_ < /dev/urandom | head -c 1)
-rand2=$(tr -dc A-Za-z0-9_ < /dev/urandom | head -c 1)
+rand2=$(tr -dc A-Za-z0-9_ < /dev/urandom | head -c 2)
 
 #glitch the files
-sed -i s/$rand1/$rand2/ out_$no.tga
+sed -i s/$rand1/$rand2/g out_$no.sgi
 
 echo -e "Glitched file $no of $fileno"
 
 no=`expr $no + 1`
 
 done
-
-echo -e "Converting files to .bmp's as avconv doesn't like these glitched files"
-#avconv doesn't seem to like these glitch .tga's so we convert them to .bmp's
+echo -e "You may see a lot of error messages here. Don't worry about them"
+#avconv doesn't seem to like sgi files as input so convert them to bmps
 gimp -n -i -b - <<EOF
-(let* ( (file's (cadr (file-glob "*.tga" 1))) (filename "") (image 0) (layer 0) )
+(let* ( (file's (cadr (file-glob "*.sgi" 1))) (filename "") (image 0) (layer 0) )
   (while (pair? file's)
     (set! image (car (gimp-file-load RUN-NONINTERACTIVE (car file's) (car file's))))
     (set! layer (car (gimp-image-merge-visible-layers image CLIP-TO-IMAGE)))
@@ -51,10 +50,10 @@ gimp -n -i -b - <<EOF
   )
 EOF
 
-rm out_*.tga
+rm out_*.sgi
 
 #combine the images into a video
-avconv -i out_%d.bmp -qscale 0 "$file"_tga.mkv
+avconv -i out_%d.bmp -b "$bitRate"k "$file"_sgi.mkv
 
 #remove the temporary directory
 cd ../
